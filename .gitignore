@@ -1,0 +1,9 @@
+node_modules/
+bags/
+pre-import/
+restored/
+target/
+*.whale_mem
+*.tmp-*
+.DS_Store
+Thumbs.db

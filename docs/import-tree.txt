@@ -1,0 +1,18 @@
+﻿{
+  "root": "<repo>",
+  "files": 11,
+  "imports": 45,
+  "relative": 11,
+  "builtin": [
+    "node:assert/strict",
+    "node:crypto",
+    "node:fs",
+    "node:os",
+    "node:path",
+    "node:readline",
+    "node:test",
+    "node:url"
+  ],
+  "violations": [],
+  "ok": true
+}

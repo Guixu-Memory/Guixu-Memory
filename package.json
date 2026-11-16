@@ -1,0 +1,27 @@
+{
+  "name": "guixu-memory",
+  "version": "0.2.0",
+  "description": "归墟 · Guixu-Memory —— memory-bag（记忆袋）格式与工具，零依赖",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "bag-export": "tools/bag-export.mjs",
+    "bag-import": "tools/bag-import.mjs",
+    "bag-pack": "tools/bag-pack.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/bag-version.test.mjs test/bag-import.test.mjs test/bag-export.test.mjs test/bag-container.test.mjs",
+    "check:imports": "node tools/check-imports.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "lib",
+    "tools",
+    "docs",
+    "examples",
+    "LICENSE",
+    "README.md"
+  ]
+}
