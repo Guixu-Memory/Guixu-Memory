@@ -29,7 +29,7 @@ npm test                                      # 全绿
 
 ## 4. 发布记录
 
-- **2026-11-16 · 0.2.0**：本地发布包 `Guixu-Memory-0.2.0.zip`（`E:\guixu-release\`），sha256 见同目录 `SHA256SUMS.txt`。
+- **2026-11-16 · 0.2.0**：本地发布包 `Guixu-Memory-0.2.0.zip`（与 `SHA256SUMS.txt` 同目录），打包自 `main` HEAD。
   - 主人已给"发"字，但选择**先出包、暂不上 GitHub**；未 push、未建远程仓。
   - 「归墟」商标查询仍待千问回执。
 
