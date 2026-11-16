@@ -19,6 +19,7 @@ npm test                                      # 全绿
 - [ ] 示例数据全为虚构；不含任何真实对话、路径、账号
 - [ ] `.gitignore` 覆盖 `bags/`、`pre-import/`、`*.whale_mem`、日志
 - [ ] 「归墟」商标 1 分钟查询（发布前做一次）
+- [ ] 署名邮箱：待主人定（当前 git 用 `guixu-memory@users.noreply.github.com` 占位）
 
 ## 3. 公开闸（把上面全过了再谈）
 
