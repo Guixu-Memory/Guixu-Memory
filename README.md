@@ -58,7 +58,7 @@ node tools/bag-import.mjs --bag restored --into target --as-guest fish --l3-appr
 - 校验不过：**拒写盘**。
 - 客舱默认隔离；要合并必须**显式**。
 - `provenance` 带三要素：平台 / 救渡人 / 日期。
-- 袋中不装凭据；硬拦截列入 **0.2.1**。
+- 袋中不装凭据；导出排除凭据类文件，**硬拦截列入 0.2.2**。
 
 ## 不变量
 
