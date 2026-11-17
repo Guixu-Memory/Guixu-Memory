@@ -53,6 +53,13 @@ node tools/bag-import.mjs --bag restored --into target --as-guest fish --l3-appr
 
 > `examples/demo-data` 里全是假数据，可以直接跑。
 
+## 安全语义
+
+- 校验不过：**拒写盘**。
+- 客舱默认隔离；要合并必须**显式**。
+- `provenance` 带三要素：平台 / 救渡人 / 日期。
+- 袋中不装凭据；硬拦截列入 **0.2.1**。
+
 ## 不变量
 
 1. **逐件 sha256**：`manifest.json` 记录每个文件的大小与哈希，校验不过即拒。
@@ -74,9 +81,11 @@ node tools/bag-import.mjs --bag restored --into target --as-guest fish --l3-appr
 - [格式规范](docs/FORMAT.md)
 - [设计与不变量](docs/DESIGN.md)
 
-## 致谢
+## 它与什么不同
 
-问题意识借鉴了 `dsh-fish-memory`、`dsh-meow-memory`、`astrbot_plugin_congling` 三个项目；本仓库**没有复制它们的代码**，只借鉴了「记忆落盘、可迁移」这件事本身。若其中有你写的东西，先说谢谢。
+- 它不是框架，也不是插件——是一个格式加几件工具，谁都能接。
+- 别人解决「怎么活」，归墟解决「怎么搬走，以及证明没搬坏」。
+- 能把记忆导出成 JSON，就能转成一袋带走。
 
 ## License
 
