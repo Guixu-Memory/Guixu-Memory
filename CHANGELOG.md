@@ -2,6 +2,14 @@
 
 > 命名三层（2026-11-16 定版）：正式名 **Guixu-Memory**／艺名 **归墟**（README 双名并挂）／`memory-bag` 作为描述关键词。
 
+## 0.2.1 — 2026-11-17
+
+- **容器 v2：manifest 摘要锚**。header 增加 `manifestSha256`（manifest 键排序稳定 JSON 的 sha256），v2 强制校验——provenance / completeness / createdAt 被改会直接红。v1 只读兼容。
+- **并发保护**：`.import-intent.json` 改为独占创建（`wx`）；已存在即拒并提示先 `--recover`。文档同步改成"不支持并行导入"，删掉"靠文件锁串行"的假承诺。
+- **自证边界写清**：格式证明"没搬坏"，不证明"没被换"；防换包靠带外 `SHA256SUMS.txt`。
+- **v0.2.0 冻结**：tag / Release / 线上 README 不动；0.2.0 的问题记 `docs/KNOWN-ISSUES.md`。
+- 测试：+2（v2 摘要锚拒绝 / 并发意图拒绝），共 **63 例**。
+
 ## 0.2.0 — 2026-11-16
 
 - **超度三件**：

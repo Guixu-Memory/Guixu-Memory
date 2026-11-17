@@ -47,11 +47,11 @@ function readFiles(dir) {
 }
 
 /** 手工造一个容器文件（用于负向用例）。 */
-function craft(header, payload) {
+function craft(header, payload, version = 1) {
   const hb = Buffer.from(JSON.stringify(header), 'utf8');
   const pre = Buffer.alloc(16);
   Buffer.from('WHALEBAG', 'ascii').copy(pre, 0);
-  pre.writeUInt16LE(1, 8);
+  pre.writeUInt16LE(version, 8);
   pre.writeUInt16LE(0, 10);
   pre.writeUInt32LE(hb.length, 12);
   const f = path.join(tmp('craft'), 'x.whale_mem');
@@ -233,4 +233,16 @@ test('容器保留 provenance / completeness，解包后仍是合法袋', async 
   const dest = path.join(tmp('metadest'), 'd');
   assert.equal(unpackBag(file, dest).ok, true);
   assert.equal(libVerifyBag(dest).ok, true);
+});
+
+test('verifyContainer：v2 摘要锚错 → 拒（manifest 被改会红）', () => {
+  const body = Buffer.from('x');
+  const files = [{ path: 'a.txt', bytes: 1, offset: 0, sha256: sha(body) }];
+  const h = headerFor(files);
+  h.containerVersion = 2;
+  h.manifestSha256 = '0'.repeat(64);
+  const f = craft(h, body, 2);
+  const v = verifyContainer(f);
+  assert.equal(v.ok, false);
+  assert.match(v.problems.join(), /摘要锚/);
 });

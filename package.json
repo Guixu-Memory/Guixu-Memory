@@ -1,6 +1,6 @@
 {
   "name": "guixu-memory",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "归墟 · Guixu-Memory —— memory-bag（记忆袋）格式与工具，零依赖",
   "license": "Apache-2.0",
   "type": "module",

@@ -54,13 +54,13 @@ bag-YYYYMMDD-HHmmss/
 - 未知版本、高于程序支持的版本：**拒绝，不猜**。
 - 升级只允许加字段/改结构，不允许删内容；每次升级产出一条 note，写进导入审计。
 
-## 4. 单文件容器 `.whale_mem`（容器 v1）
+## 4. 单文件容器 `.whale_mem`（容器 v2；v1 只读兼容）
 
 全部小端：
 
 ```
 0    8   magic "WHALEBAG"（ASCII）
-8    2   containerVersion = 1
+8    2   containerVersion = 2（v1 为旧版，只读兼容）
 10   2   flags = 0（保留）
 12   4   headerLength（字节）
 16   ..  header JSON（UTF-8）
@@ -72,9 +72,10 @@ bag-YYYYMMDD-HHmmss/
 ```json
 {
   "format": "whale-bag",
-  "containerVersion": 1,
+  "containerVersion": 2,
   "createdAt": "…",
   "generation": "…",
+  "manifestSha256": "…",
   "manifest": { /* 目录袋的 manifest.json 原样 */ },
   "files": [
     { "path": "memory.json", "bytes": 1234, "offset": 0, "sha256": "…" }
@@ -82,12 +83,16 @@ bag-YYYYMMDD-HHmmss/
 }
 ```
 
+- `manifestSha256`＝manifest 全文按**键排序稳定 JSON** 再 sha256（`canonicalJson`）；v2 必填并强制校验——provenance / completeness / createdAt 被改会直接红。
+- v1 容器（0.2.0 产物）无此锚，只读兼容；建议升级到 v2 重打。
+
 校验顺序（任一条不过即拒）：
 
 1. magic / 版本 / flags / header 长度合法；
-2. `header.files` 与 `manifest.files` 逐项一致（path / bytes / sha256），顺序相同；
-3. `offset` 首尾相接，总和等于 payload 长度；
-4. 逐文件重算 sha256。
+2. v2：`manifestSha256` 必须等于 manifest 的稳定摘要（防 manifest 被改）；
+3. `header.files` 与 `manifest.files` 逐项一致（path / bytes / sha256），顺序相同；
+4. `offset` 首尾相接，总和等于 payload 长度；
+5. 逐文件重算 sha256。
 
 路径只接受安全相对路径：不含 `..`、反斜杠、盘符、前导 `/`。解包拒绝写非空目录（`--force` 才覆盖），且先全量校验再落盘。
 

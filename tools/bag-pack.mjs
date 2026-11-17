@@ -22,7 +22,7 @@ if (has('verify')) {
   if (!f) die('用法：--verify <file.whale_mem>');
   else {
     const r = verifyContainer(f);
-    console.log(JSON.stringify({ ok: r.ok, problems: r.problems, files: r.files, bytes: r.bytes, generation: r.generation }, null, 2));
+    console.log(JSON.stringify({ ok: r.ok, problems: r.problems, files: r.files, bytes: r.bytes, generation: r.generation, containerVersion: r.version ?? null, manifestAnchored: r.manifestAnchored === true }, null, 2));
     process.exitCode = r.ok ? 0 : 1;
   }
 } else if (has('unpack')) {

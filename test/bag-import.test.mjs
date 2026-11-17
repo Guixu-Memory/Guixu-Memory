@@ -312,3 +312,16 @@ test('verifyBag：completeness=partial 但没写 missing → 拒', () => {
   assert.match(v.problems.join(), /missing/);
 });
 
+test('并发/半截保护：已有 .import-intent.json → 拒绝且不动数据；recover 后放行', () => {
+  const { bagDir, dataDir, backupRoot } = setup();
+  fs.writeFileSync(path.join(dataDir, '.import-intent.json'), JSON.stringify({ gen: 'x' }));
+  const r = runImport({ bagDir, dataDir, backupRoot, l3Approved: true });
+  assert.equal(r.ok, false);
+  assert.match(r.problems.join(), /recover/);
+  assert.ok(!fs.existsSync(path.join(dataDir, 'memory.json')), '拒绝时不得落任何段');
+  const rec = recoverInterrupted({ dataDir, backupRoot });
+  assert.equal(rec.recovered, true);
+  const r2 = runImport({ bagDir, dataDir, backupRoot, l3Approved: true, force: true });
+  assert.equal(r2.ok, true, JSON.stringify(r2.problems));
+});
+
