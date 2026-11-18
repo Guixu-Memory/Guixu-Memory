@@ -14,6 +14,7 @@
 //   node tools/bag-export.mjs --yes                       # 跳过二次确认（脚本用）
 //   node tools/bag-export.mjs --dry-run                   # 只出计划，不写盘
 //   node tools/bag-export.mjs --single                    # 另打单文件 <袋目录>.whale_mem
+//   node tools/bag-export.mjs --allow-credentials         # 显式放行疑似凭据（会在 manifest/audit 留痕；默认命中即拒）
 //   node tools/bag-export.mjs --verify <bagDir>           # 逐文件校验 manifest
 //   node tools/bag-export.mjs --restore <bagDir> <dest>   # 五来源恢复到隔离目录
 import fs from 'node:fs';
@@ -21,6 +22,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import readline from 'node:readline';
 import { packBag } from '../lib/bag-container.mjs';
+import { scanExport, formatHits } from '../lib/credential-scan.mjs';
 import { pathToFileURL } from 'node:url';
 
 const DEFAULT_DATA = null; // 不猜本机路径：--data 必填
@@ -119,7 +121,7 @@ export function planExport({ dataDir = DEFAULT_DATA, includePersonas = false } =
   };
 }
 
-function writeBag(plan, { outRoot, dataDir, provenance = null, completeness = 'full', missing = [] }) {
+function writeBag(plan, { outRoot, dataDir, provenance = null, completeness = 'full', missing = [], credentialOverride = null }) {
   const base = path.join(outRoot, 'bag-' + stamp());
   let dir = base;
   for (let i = 1; fs.existsSync(dir); i++) dir = base + '-' + i;
@@ -149,6 +151,7 @@ function writeBag(plan, { outRoot, dataDir, provenance = null, completeness = 'f
     completeness,
     missing,
     source: { dataDir },
+    ...(credentialOverride ? { credentialOverride } : {}),
     files: manifestFiles,
     sections,
   };
@@ -172,6 +175,7 @@ export async function exportBag({
   dataDir = DEFAULT_DATA, outRoot = DEFAULT_OUT, includePersonas = false,
   dryRun = false, yes = false, single = false,
   provenance = null, missing = [], partial = false,
+  allowCredentials = false,
   ask = null, log = console.log,
 } = {}) {
   const plan = planExport({ dataDir, includePersonas });
@@ -189,7 +193,22 @@ export async function exportBag({
     for (const p of plan.problems) log('  ✗ ' + p);
     return { ok: false, problems: plan.problems };
   }
-  if (dryRun) return { ok: true, dryRun: true, plan, provenance, completeness, missing: missingNotes };
+
+  // 凭据入口闸（v0.2.2 最小版）：文本内容 + 文件名 + manifest 字段，命中即拒（fail-closed）
+  const credHits = scanExport({ files: plan.files, provenance, missing: missingNotes, dataDir });
+  if (credHits.length) {
+    for (const line of formatHits(credHits)) log('  ⚠ ' + line);
+    if (!allowCredentials) {
+      return {
+        ok: false,
+        problems: [`检出疑似凭据 ${credHits.length} 处，导出已拒（--force 不放行；确认要导用 --allow-credentials，会在 manifest 与 outRoot/audit 留痕）`],
+        credentialHits: credHits,
+      };
+    }
+    log(`凭据闸：${credHits.length} 处命中，--allow-credentials 已显式放行（manifest 与 audit 留痕）`);
+  }
+
+  if (dryRun) return { ok: true, dryRun: true, plan, provenance, completeness, missing: missingNotes, credentialHits: credHits };
 
   if (!yes) {
     if (typeof ask !== 'function') {
@@ -202,7 +221,22 @@ export async function exportBag({
     }
   }
 
-  const { dir, manifest } = writeBag(plan, { outRoot, dataDir, provenance, completeness, missing: missingNotes });
+  const credentialOverride = credHits.length && allowCredentials
+    ? { at: new Date().toISOString(), reason: '--allow-credentials', hits: credHits.map((h) => ({ rule: h.rule, where: h.where, sample: h.sample })) }
+    : null;
+
+  const { dir, manifest } = writeBag(plan, { outRoot, dataDir, provenance, completeness, missing: missingNotes, credentialOverride });
+  if (credentialOverride) {
+    // 开关本身进审计：append-only，写在袋目录之外，跟着 outRoot 走
+    try {
+      const auditDir = path.join(outRoot, 'audit');
+      fs.mkdirSync(auditDir, { recursive: true });
+      fs.appendFileSync(path.join(auditDir, 'export-credentials.jsonl'),
+        JSON.stringify({ at: credentialOverride.at, bag: dir, reason: credentialOverride.reason, hits: credentialOverride.hits }) + '\n', 'utf8');
+    } catch (e) {
+      log('  ⚠ 凭据放行审计未写成：' + (e?.message ?? e));
+    }
+  }
   log('bag ' + dir);
   for (const [k, s] of Object.entries(manifest.sections)) {
     const n = s.count ?? s.lines ?? s.entries ?? s.files ?? '';
@@ -216,7 +250,7 @@ export async function exportBag({
     if (packed.ok) log(`single ${packed.file} bytes=${packed.bytes} files=${packed.files} sha=${packed.sha256.slice(0, 16)}`);
     else log('单文件打包失败：' + packed.problems.join('; '));
   }
-  return { ok: true, dir, manifest, files: manifest.files.length, bytes: manifest.files.reduce((a, b) => a + b.bytes, 0), single: packed };
+  return { ok: true, dir, manifest, files: manifest.files.length, bytes: manifest.files.reduce((a, b) => a + b.bytes, 0), single: packed, credentialHits: credHits };
 }
 
 /** 逐文件 sha256 + 段计数复核；不退出进程，返回 {ok, bad, files, manifest}。 */
@@ -324,6 +358,7 @@ export async function main(argv = process.argv.slice(2)) {
       dryRun: has('dry-run'),
       yes: has('yes'),
       single: has('single'),
+      allowCredentials: has('allow-credentials'),
       provenance,
       missing,
       partial: has('partial'),

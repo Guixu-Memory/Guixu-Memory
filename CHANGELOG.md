@@ -10,6 +10,8 @@
 - 测试：+4（`test/bag-manifest.test.mjs`，钉住目录袋态边界与容器态对照），共 **67 例**。
 - 已发布物料（0.2.0 / 0.2.1 的 tag、Release、包内 README）一律未动。
 - **凭据边界如实标注**：`README.md` 安全语义区明说"当前版本未实现凭据硬拦截"，并点名四类禁存物（API key / token / 私钥 / 数据库 URL）；`docs/KNOWN-ISSUES.md` 把凭据扫描＋硬拦截升格为 **v0.3.0 前必须落地**（最小版 v0.2.2 起做）。原因：凭据一旦写进记忆，导出会原样带走并进 manifest / diff / 备份链——拦得住落地，拦不住被看见。
+- **凭据入口闸（v0.2.2 最小版，main 已实现待发）**：导出时逐件扫文本内容＋文件名＋manifest 字段（provenance / missing / source），命中即 **reject**（`--force` 不放行）；只有 `--allow-credentials` 显式开关可过，放行会在 `manifest.credentialOverride` 与 `<outRoot>/audit/export-credentials.jsonl` 留痕。模式集：`sk-`、`AKIA…`、`ghp_/github_pat_`、`BEGIN … PRIVATE KEY`、数据库连接串、URL 内嵌密码、`.env` 文件名。
+- 测试：+12（`test/bag-credential.test.mjs`），共 **79 例**。
 
 ## 0.2.1 — 2026-11-17
 

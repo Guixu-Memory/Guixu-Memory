@@ -10,7 +10,7 @@
     "bag-pack": "tools/bag-pack.mjs"
   },
   "scripts": {
-    "test": "node --test test/bag-version.test.mjs test/bag-import.test.mjs test/bag-export.test.mjs test/bag-container.test.mjs test/bag-manifest.test.mjs",
+    "test": "node --test test/bag-version.test.mjs test/bag-import.test.mjs test/bag-export.test.mjs test/bag-container.test.mjs test/bag-manifest.test.mjs test/bag-credential.test.mjs",
     "check:imports": "node tools/check-imports.mjs"
   },
   "engines": {
