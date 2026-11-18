@@ -2,6 +2,14 @@
 
 > 命名三层（2026-11-16 定版）：正式名 **Guixu-Memory**／艺名 **归墟**（README 双名并挂）／`memory-bag` 作为描述关键词。
 
+## 未发布（main）
+
+- **文档：写清摘要锚的"起算点"**。`docs/DESIGN.md` 新增 §7.1——锚只在打成 v2 容器时生效，覆盖打包那一刻的 manifest；目录袋（未打包）阶段 `manifest.json` 仍是免哈希元数据，改 `provenance` / `completeness` / `createdAt` 不检出，打包会把当时的档案（含被改过的）一起锚定。要全程可证＝导出后立刻 `--single` 并记袋哈希。
+- `README.md` 安全语义那行补半句「（v2 容器起生效）」，不再给人"从文件出生就防篡改"的印象。
+- `docs/KNOWN-ISSUES.md` 记 0.2.2 计划：目录袋阶段把 manifest 纳入完整性保护（候选旁挂 `manifest.sha256` + `verifyBag` 链式核），0.2.2 之前不动代码。
+- 测试：+4（`test/bag-manifest.test.mjs`，钉住目录袋态边界与容器态对照），共 **67 例**。
+- 已发布物料（0.2.0 / 0.2.1 的 tag、Release、包内 README）一律未动。
+
 ## 0.2.1 — 2026-11-17
 
 - **容器 v2：manifest 摘要锚**。header 增加 `manifestSha256`（manifest 键排序稳定 JSON 的 sha256），v2 强制校验——provenance / completeness / createdAt 被改会直接红。v1 只读兼容。

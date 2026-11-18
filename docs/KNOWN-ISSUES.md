@@ -13,5 +13,7 @@
 
 ## v0.2.1
 
-- 已知：无。
+- **已知边界（不是事故，文档化行为）**：摘要锚只在**打成 v2 容器时**生效，覆盖"打包那一刻"的 manifest；**目录袋（未打包）阶段 `manifest.json` 仍是免哈希元数据**——改 `provenance` / `completeness` / `createdAt`，`verifyBag` 不检出；把改过的目录袋再打包，假档案会被一起锚进新容器（"洗白"）。
+  → 已在 `docs/DESIGN.md` §7.1 写清起算点与"导出后立刻 `--single` 并记袋哈希"的做法；行为由 `test/bag-manifest.test.mjs` 钉住。
 - **0.2.2 计划（挪版说明）**：凭据硬拦截——导出时对 `config*` / `register*` 样式的文件直接 reject（当前只有"默认不带人格、密钥不进袋"的约定，无硬拦截）。README 已把承诺改为"导出排除凭据类文件，硬拦截列入 0.2.2"；已发布的 0.2.0/0.2.1 物料一律不碰。
+- **0.2.2 计划（完整性补全）**：目录袋阶段把 `manifest.json` 纳入完整性保护（候选：目录袋旁挂 `manifest.sha256`，`verifyBag` 起链式核；打包时把旁挂摘要并入 v2 锚）。**0.2.2 之前不动代码**，先记账；实施后 `test/bag-manifest.test.mjs` 改写为"改 manifest 即红"的正向测试。

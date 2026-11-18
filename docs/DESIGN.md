@@ -60,3 +60,14 @@
 - **能证**：袋没被搬坏——逐件 sha256 + manifest 摘要锚（v2）+ payload 长度闭合；任何一位改动都会红。
 - **不能证**：袋没被**换过**——整个容器（含 header/manifest）可以被重写出一份内部完全自洽的新袋。
 - 所以防换包靠**带外锚**：发布时给 `SHA256SUMS.txt`（zip/容器的 sha256），从可信渠道取；签名（Ed25519）是 0.2.1 的可选项，尚未实现。
+
+### 7.1 锚的起算点＝打成 v2 容器那一刻
+
+摘要锚（`manifestSha256`）覆盖的是**打包那一刻的 manifest 全文**，不是"文件从出生起的全部历史"。由此有三条必须说清的边界：
+
+- **目录袋（未打包）阶段，`manifest.json` 是免哈希元数据**：它记 `provenance`（何来/救渡人/日期）、`completeness`、`createdAt`，但**不列进 `files[]`、也不自我哈希**。这一段改出处档案或日期，`verifyBag` **不检出**——逐件 sha256 只守 `files[]` 里列的件。
+- **打包会把当时的档案一起锚定**：把改过 manifest 的目录袋 `--single` 打包，假档案随 manifest 一起进锚，`verifyContainer` 也绿（"洗白"）。锚证明的是"从打包起没被改"，不证明"打包前没被改"。
+- **要全程可证，导出后立刻装袋并记袋哈希**：`bag-export --single` 之后把 `.whale_mem` 的 sha256 记到袋外（`SHA256SUMS.txt`、仓库 Release、或自己的台账）；从此任何对 manifest 的改动都会红。
+
+> 已知边界，不是事故。0.2.2 计划把目录袋阶段也纳入完整性保护（候选：目录袋旁挂 `manifest.sha256`，`verifyBag` 起链式核），见 `docs/KNOWN-ISSUES.md`。当前行为由 `test/bag-manifest.test.mjs` 钉住。
+
