@@ -12,6 +12,7 @@
 - **凭据边界如实标注**：`README.md` 安全语义区明说"当前版本未实现凭据硬拦截"，并点名四类禁存物（API key / token / 私钥 / 数据库 URL）；`docs/KNOWN-ISSUES.md` 把凭据扫描＋硬拦截升格为 **v0.3.0 前必须落地**（最小版 v0.2.2 起做）。原因：凭据一旦写进记忆，导出会原样带走并进 manifest / diff / 备份链——拦得住落地，拦不住被看见。
 - **凭据入口闸（v0.2.2 最小版，main 已实现待发）**：导出时逐件扫文本内容＋文件名＋manifest 字段（provenance / missing / source），命中即 **reject**（`--force` 不放行）；只有 `--allow-credentials` 显式开关可过，放行会在 `manifest.credentialOverride` 与 `<outRoot>/audit/export-credentials.jsonl` 留痕。模式集：`sk-`、`AKIA…`、`ghp_/github_pat_`、`BEGIN … PRIVATE KEY`、数据库连接串、URL 内嵌密码、`.env` 文件名。
 - 测试：+12（`test/bag-credential.test.mjs`），共 **79 例**。
+- **已知边界（凭据闸，二期再议）**：① 大写 `SK-` 开头不触发（真实 key 均为小写 `sk-`）；② 拆进两个 JSON 字段的碎片串不触发（正则本质限制，"拼合扫描"二期再议）；③ base64 私钥长串不触发（已声明二期）。以上均不影响主用例，不返工。
 
 ## 0.2.1 — 2026-11-17
 
