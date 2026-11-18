@@ -58,7 +58,8 @@ node tools/bag-import.mjs --bag restored --into target --as-guest fish --l3-appr
 - 校验不过：**拒写盘**。
 - 客舱默认隔离；要合并必须**显式**。
 - `provenance` 带三要素：平台 / 救渡人 / 日期（v2 容器起生效；目录袋阶段 manifest 仍是免哈希元数据，边界见 [设计与不变量](docs/DESIGN.md) §7.1）。
-- 袋中不装凭据；导出排除凭据类文件，**硬拦截列入 0.2.2**。
+- 袋中不装凭据：**当前版本未实现凭据硬拦截——请勿把 API key / token / 私钥 / 数据库 URL 等敏感值写进记忆**。
+- 导出默认排除凭据类文件名；内容级扫描列入 **v0.3.0 前**（进度见 [KNOWN-ISSUES](docs/KNOWN-ISSUES.md)）。
 
 ## 不变量
 
